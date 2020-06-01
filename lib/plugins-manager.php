@@ -15,7 +15,7 @@ if (!$demoMode && isset($_SESSION['loggedIn']) && $_SESSION['loggedIn'] && isset
 
 	// Get our old plugin & user settings
 	$oldPlugins = $ICEcoder["plugins"];
-	$settingsContents = getData($settingsFile);
+	$settingsContents = getData("../data/".$settingsFile);
 
 	// ==========
 	// INSTALLING
@@ -25,7 +25,7 @@ if (!$demoMode && isset($_SESSION['loggedIn']) && $_SESSION['loggedIn'] && isset
 
 		// Store the plugin zip to the tmp dir
 		$target = '../plugins/';
-		$zipURL = $pluginsData[strClean($_GET['plugin'])]['zipURL'];
+		$zipURL = $pluginsData[$_GET['plugin']]['zipURL'];
 	    	$zipFile = "../tmp/".basename($zipURL);
 		$fileData = getData($zipURL,'curl');
 		file_put_contents($zipFile, $fileData);
@@ -95,7 +95,7 @@ if (!$demoMode && isset($_SESSION['loggedIn']) && $_SESSION['loggedIn'] && isset
 
 		// Finally, delete the plugin itself
 		$target = '../plugins/';
-		$dirName = basename($pluginsData[strClean($_GET['plugin'])]['zipURL'],".zip");
+		$dirName = basename($pluginsData[$_GET['plugin']]['zipURL'],".zip");
 		deletePlugin($target.$dirName."/");
 	}
 
@@ -132,8 +132,8 @@ if (!$demoMode && isset($_SESSION['loggedIn']) && $_SESSION['loggedIn'] && isset
 	$settingsContents = substr($settingsContents,0,$repPosStart).$settingsNew.substr($settingsContents,$repPosEnd,strlen($settingsContents));
 
 	// Now update the config file
-	if (is_writeable($settingsFile)) {
-		$fh = fopen($settingsFile, 'w');
+	if (is_writeable("../data/".$settingsFile)) {
+		$fh = fopen("../data/".$settingsFile, 'w');
 		fwrite($fh, $settingsContents);
 		fclose($fh);
 		// Finally, reload ICEcoder itself if plugin requires it or just the iFrame screen for the user if it doesn't
@@ -145,7 +145,7 @@ if (!$demoMode && isset($_SESSION['loggedIn']) && $_SESSION['loggedIn'] && isset
 		}
 		die("<span style='color: #fff'>".$t['saving plugins']."</span>");
 	} else {
-		echo "<script>top.ICEcoder.message('".$t['Cannot update config...']." lib/".$settingsFile." ".$t['and try again']."');</script>";
+		echo "<script>top.ICEcoder.message('".$t['Cannot update config...']." data/".$settingsFile." ".$t['and try again']."');</script>";
 	}
 }
 

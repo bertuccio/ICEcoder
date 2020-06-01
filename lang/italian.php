@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 // Italian language translation
 // by: @pietrondo (GitHub)
 //     @pietrobravo (Twitter)
@@ -23,10 +23,6 @@ $text = array(
 		"files"				=> "file",
 		"Last 10 files..."		=> "Ultimi 10 file aperti:",
 		"none"				=> "[none]",
-		"test suite"			=> "prova suite",
-		"trial remaining"		=> "tempo rimanente alla fine del periodo di prova",
-		"days left"			=> "giorni rimanenti",
-		"Run unit tests"		=> "Esegui test di unità",
 		"dev mode"			=> "modalit&agrave; sviluppo",
 		"Status"			=> "Stato",
 		"Using"				=> "Utilizzo",

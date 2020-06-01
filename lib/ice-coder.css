@@ -83,10 +83,14 @@ h2 {font-size: 18px; font-weight: normal; color: #fff}
 .files .button {position: absolute; border: 0; background: #444; color: #eee; height:20px; margin-top: 16px; margin-left: 5px; font-size: 11px; cursor: pointer}
 .files .button:hover {background-color: #1d1d1b; color: #eee}
 .files .frame {display: inline-block; width: 250px; margin-top: 24px}
-.files .serverMessage {position: absolute; display: inline-block; width: 450px; bottom: 0; background-color: rgba(255,255,255,0.8); font-size: 10px; padding: 4px 12px 1px 12px; opacity: 0; 
+.files .serverMessage {position: absolute; display: inline-block; width: 450px; bottom: 0; background-color: rgba(255,255,255,0.8); font-size: 10px; padding: 4px 12px 1px 12px; opacity: 0;
 	transition: opacity 0.2s;
 }
 .files .serverMessage b {font-size: 10px}
+
+.files .tools {position: absolute; display: inline-block; width: 250px; height: 30px; left: 0; bottom: 0}
+.files .tools div {display: inline-block; margin: 8px 0 8px 15px; color: #666; cursor: pointer}
+.files .tools div:hover {color: #fff; cursor: pointer}
 
 .editor {position: absolute; display: inline-block; top: 0; left: 15px; width: 2400px}
 .editor .tabsBar {display: inline-block; height: 22px; width: 2400px; margin-top: 20px; padding-left: 53px; background: #fff}
@@ -112,7 +116,7 @@ h2 {font-size: 18px; font-weight: normal; color: #fff}
 .editor .findBar {display: inline-block; height: 28px; width: 2400px; color: #fff; background-color: #1d1d1b}
 .findBar .findReplace {position: absolute; padding-top: 2px; z-index: 1}
 .findReplace .selectWrapper {position: relative; display: inline-block}
-.findReplace .selectWrapper select {position: relative; padding: 1px; border: 0; background: url('../images/select-arrow.gif') no-repeat right #444; color: #fff; font-size: 10px; height: 16px; 
+.findReplace .selectWrapper select {position: relative; padding: 1px; border: 0; background: url('../images/select-arrow.gif') no-repeat right #444; color: #fff; font-size: 10px; height: 16px;
 	-webkit-appearance: none;
 	-moz-appearance: none;
 	appearance: none;
@@ -135,7 +139,15 @@ h2 {font-size: 18px; font-weight: normal; color: #fff}
 .findBar .bug {position: fixed; display: inline-block; width: 16px; height: 16px; right: 209px; top: 48px; background: url('../images/bug-reporting-icons.png') 0 0 no-repeat; cursor: pointer; background-position: 0 0}
 .findBar .minimapLink {position: fixed; display: inline-block; width: 16px; height: 16px; right: 164px; top: 48px; background: url('../images/doc-explorer-icons.png') 0 0 no-repeat; cursor: pointer; background-position: 0 0; cursor: pointer; z-index: 1}
 .findBar .functionClassListLink {position: fixed; display: inline-block; width: 16px; height: 16px; right: 138px; top: 48px; background: url('../images/doc-explorer-icons.png') 0 0 no-repeat; cursor: pointer; background-position: -16px 0; cursor: pointer; z-index: 1}
-.findBar .terminalLink {position: fixed; display: inline-block; width: 16px; height: 16px; right: 112px; top: 48px; background: url('../images/doc-explorer-icons.png') 0 0 no-repeat; cursor: pointer; background-position: -32px 0; cursor: pointer; z-index: 1}
+.editor .terminal {position: fixed; top: 10000px; transition: top 0.2s ease; z-index: 2}
+.editor .output {position: fixed; top: 10000px; padding: 15px 18px 8px 13px; transition: top 0.2s ease; background: rgba(0,0,0,0.92); z-index: 2}
+.editor .database {position: fixed; top: 10000px; transition: top 0.2s ease; z-index: 2}
+.editor .git {position: fixed; top: 10000px; padding: 15px 18px 15px 13px; overflow-y: auto; transition: top 0.2s ease; background: rgba(0,0,0,0.92); z-index: 2}
+.editor .git::-webkit-scrollbar {width: 12px; height: 12px; background: #666}
+.editor .git::-webkit-scrollbar-thumb {background: rgba(0,198,255,1)}
+.editor .git::-webkit-scrollbar-corner, .editor .git::-webkit-scrollbar-resizer {background: transparent}
+.editor .git .link {font-family: monospace; cursor: pointer}
+.editor .git .link:hover {color:  rgba(0,198,255,1)}
 .editor .code {position: relative; display: inline-block; top: 28px; width: 600px; height: 600px; visibility: hidden}
 
 .footer {position: fixed; display: inline-block; width: 100%; height: 30px; bottom: 0; background-color: rgba(0,0,0,0.15); left: 0; z-index: 1}
@@ -165,6 +177,8 @@ h2 {font-size: 18px; font-weight: normal; color: #fff}
 .docExplorer .functionClassList .functionClassListItem {font-family: monospace; line-height: 14px; margin-bottom: 6px; cursor: pointer}
 .docExplorer .functionClassList .functionClassListItem .name {font-family: monospace; color: rgba(0,198,255,0.5)}
 .docExplorer .functionClassList .functionClassListItem .params {font-family: monospace; font-size: 10px}
+
+.tooltip {position: absolute; top: 0; left: 0; padding: 5px; background: #444; color: #bbb}
 
 .screenContainer {position: absolute; display: table; width: 100%; height: 100%; top: 0; left: 0; text-align: center}
 .screenContainer .screenVCenter {#position: absolute; display: table-cell; #top: 50%; vertical-align: middle; text-align: center}

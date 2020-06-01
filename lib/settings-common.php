@@ -2,7 +2,7 @@
 // Don't display, but log all errors
 ini_set('display_errors', 0);
 ini_set('log_errors', 1);
-ini_set('error_log', dirname(__FILE__).'/../error-log.txt');
+ini_set('error_log', dirname(__FILE__).'/../data/error.log');
 error_reporting(-1);
 
 // Set our default timezone and supress warning with @
@@ -17,7 +17,7 @@ $context = stream_context_create(array('http'=>
 
 // Start a session if we haven't already
 if(!isset($_SESSION)) {
-	ini_set('session.use_cookies','1');				// Use cookies not URL parameters 
+	ini_set('session.use_cookies','1');				// Use cookies not URL parameters
 	ini_set('session.use_only_cookies','1');			// Force use of cookies and nothing else
 	ini_set('session.name','ICEcoder_Cookie');			// Set a seperate cookie session name
 	ini_set('session.cookie_lifetime','0');        			// Until the browser restarts by default
@@ -31,9 +31,9 @@ if(!isset($_SESSION)) {
 	ini_set('session.save_path',dirname(__FILE__).'/../tmp');	// Localise the session files to /tmp
 
 	if (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') {
-		ini_set('session.cookie_secure','1');			// Only allows access to session ID when protocol is HTTPS, switched on under 'if https' condition 
+		ini_set('session.cookie_secure','1');			// Only allows access to session ID when protocol is HTTPS, switched on under 'if https' condition
 	}
-	@session_start();						// Finally, start the session!
+	session_start();						// Finally, start the session!
 	if (!isset($_SESSION['csrf'])){
 		session_regenerate_id(true);				// Create a new ID to help prevent fixation
 	}
@@ -43,6 +43,36 @@ if(!isset($_SESSION)) {
 if (isset($_SESSION['text'])) {
 	$text = $_SESSION['text'];
 	$t = $text['settings-common'];
+}
+
+// Copy over backups if we've just updated to new version (TODO: can be moved to updater.php one day after 7.0 released)
+if (isset($_GET['display']) && $_GET['display'] === "updated") {
+	// If the backups dir doesn't exist, or it does but is empty
+	if (
+		!file_exists(dirname(__FILE__)."/../data/backups") ||
+		count(array_diff(scandir(dirname(__FILE__)."/../data/backups"), ['.', '..'])) === 0
+	) {
+		// If the old version has some backups to move over
+		if (count(array_diff(scandir(dirname(__FILE__)."/../tmp/oldVersion/backups"), ['.', '..'])) > 0) {
+			// If the data dir is writable
+			if (is_writable(dirname(__FILE__)."/../data")) {
+				// Remove the backups dir if it's there and writable
+				if (file_exists(dirname(__FILE__)."/../data/backups") && is_writable(dirname(__FILE__)."/../data")) {
+					rmdir(dirname(__FILE__)."/../data/backups");
+				}
+				// Move backups dir from old version to current version
+				rename(dirname(__FILE__)."/../tmp/oldVersion/backups", dirname(__FILE__)."/../data/backups");
+			}
+		}
+	}
+}
+
+// Check requirements meet minimum spec
+include(dirname(__FILE__)."/requirements.php");
+
+// Create a backups dir in the data dir if it doesn't exist yet
+if (!file_exists(dirname(__FILE__)."/../data/backups")) {
+    mkdir(dirname(__FILE__)."/../data/backups");
 }
 
 // Get data from a fopen or CURL connection
@@ -88,6 +118,26 @@ function getData($url,$type='fopen',$dieMessage=false,$timeout=60) {
 	}
 }
 
+// Require a re-index dir/file data next time we index
+function requireReIndexNextTime() {
+	// If we have a data/index.php file
+	global $docRoot, $ICEcoderDir;
+	if (file_exists($docRoot.$ICEcoderDir."/data/index.php")) {
+		// Get serialized array back out of PHP file inside a comment block as prevIndexData
+		$prevIndexData = file_get_contents($docRoot.$ICEcoderDir."/data/index.php");
+		if (strpos($prevIndexData, "<?php") !== false) {
+			$prevIndexData = str_replace("<?php\n/*\n\n", "", $prevIndexData);
+			$prevIndexData = str_replace("\n\n*/\n?>", "", $prevIndexData);
+			$prevIndexData = unserialize($prevIndexData);
+
+			// Set timestamp back to epoch to force a re-index next time
+			$prevIndexData['timestamps']['indexed'] = 0;
+
+			file_put_contents($docRoot.$ICEcoderDir."/data/index.php", "<?php\n/*\n\n".serialize($prevIndexData)."\n\n*/\n?".">");
+		}
+	}
+}
+
 // Logout if that's the action we're taking
 if (isset($_GET['logout'])) {
 	include(dirname(__FILE__)."/../processes/on-user-logout.php");
@@ -98,32 +148,24 @@ if (isset($_GET['logout'])) {
 	die("Logging you out...");
 }
 
-// If magic quotes are still on
-if (get_magic_quotes_gpc ()) {
-	function stripslashes_deep($value) {
-		$value = is_array($value) ? array_map('stripslashes_deep', $value) : stripslashes($value);
-		return $value;
-	}
-	$_POST = (isset($_POST) && !empty($_POST)) ? array_map('stripslashes_deep', $_POST) : array();
-	$_GET = (isset($_GET) && !empty($_GET)) ? array_map('stripslashes_deep', $_GET) : array();
-	$_COOKIE = (isset($_COOKIE) && !empty($_COOKIE)) ? array_map('stripslashes_deep', $_COOKIE) : array();
-	$_REQUEST = (isset($_REQUEST) && !empty($_REQUEST)) ? array_map('stripslashes_deep', $_REQUEST) : array();
-}
-
-// Function to handle salted hashing
 define('SALT_LENGTH',12);
-function generateHash($plainText,$salt=null) {
-	if ($salt === null) {
-		$salt = substr(md5(uniqid(rand(), true)),0,SALT_LENGTH);
-	} else {
-		$salt = substr($salt,0,SALT_LENGTH);
-	}
-	return $salt.sha1($salt.$plainText);
+// Generate hash
+function generateHash($pw) {
+    // Generate Bcrypt hash
+    return password_hash($pw, PASSWORD_BCRYPT, $options = ['cost' => 10]);
 }
 
-// returns converted entities which have HTML entity equivalents
-function strClean($var) {
-	return preg_replace("/javascript\:/i","javascript&colon;",htmlentities($var, ENT_QUOTES, "UTF-8"));
+// Verify hash
+function verifyHash($pw, $orig) {
+    // Verify Bcrypt hash
+    if (substr($orig, 0, 4) === "$2y$") {
+        return password_verify($pw, $orig)
+            ? $orig
+            : "NO MATCH";
+    }
+    // Verify legacy sha1 hash
+    $origSalt = substr($orig,0,SALT_LENGTH);
+    return $origSalt.sha1($origSalt.$pw);
 }
 
 // returns a number, whole or decimal or null
@@ -179,7 +221,7 @@ function injClean($data) {
 }
 
 // returns a UTF8 based string with any UFT8 BOM removed
-function toUTF8noBOM($string,$message) {
+function toUTF8noBOM($string,$message=false) {
 	global $text;
 	$t = $text['settings-common'];
 
@@ -200,12 +242,12 @@ function toUTF8noBOM($string,$message) {
 			}
 		}
 		// Remove any other BOMs from view
-		$string = preg_replace('/'.$bom.'/','',$string); 
+		$string = preg_replace('/'.$bom.'/','',$string);
 
 		// Test for any bad characters
 		$teststring = $string;
 		$teststringBroken = utf8_decode($teststring);
-		$teststringConverted = iconv("UTF-8", "UTF-8//IGNORE", $teststringBroken);
+		$teststringConverted = mb_convert_encoding($teststringBroken, "UTF-8");
 		// If we have a matching length, UTF8 encode it
 		if (!$strictUTF8 && strlen($teststringConverted) == strlen($teststringBroken)) {
 			$string = utf8_encode($string);
@@ -254,7 +296,7 @@ function getVersionsCount($fileLoc,$fileName) {
 	$dateCounts = array();
 	$backupDateDirs = array();
 	// Establish the base, host and date dirs within...
-	$backupDirBase = str_replace("\\","/",dirname(__FILE__))."/../backups/";
+	$backupDirBase = str_replace("\\","/",dirname(__FILE__))."/../data/backups/";
 	$backupDirHost = isset($ftpSite) ? parse_url($ftpSite,PHP_URL_HOST) : "localhost";
         // check if folder exists if local before enumerating contents
         if(!isset($ftpSite)) {
@@ -301,3 +343,15 @@ function getVersionsCount($fileLoc,$fileName) {
 	);
 }
 
+function serializedFileData($do, $path, $output=null) {
+	if ($do === "get") {
+		$data = file_get_contents($path);
+		$data = str_replace("<"."?php\n/*\n\n", "", $data);
+		$data = str_replace("\n\n*/\n?".">", "", $data);
+		$data = unserialize($data);
+		return $data;
+	}
+	if ($do === "set") {
+		file_put_contents($path, "<"."?php\n/*\n\n".serialize($output)."\n\n*/\n?".">");
+	}
+}

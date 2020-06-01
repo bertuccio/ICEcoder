@@ -21,13 +21,9 @@ $text = array(
 		"your device"			=> "Uw apparaat",
 		"Browser"			=> "Browser:",
 		"Your IP"			=> "Uw IP:",
-		"trial remaining"		=> "Resterende demo tijd",
-		"days left"			=> "dagen",
 		"files"				=> "bestanden",
 		"Last 10 files..."		=> "Laatste 10 geopende bestanden:",
 		"none"				=> "[none]",
-		"test suite"			=> "test suite",
-		"Run unit tests"		=> "Voer unit tests uit",
 		"dev mode"			=> "Ontwikkelaars modus",
 		"Status"			=> "Status",
 		"Using"				=> "Gebruikt",
@@ -475,7 +471,7 @@ $text = array(
 	array(
 		"Update appears to..."		=> "Update succesvol uitgevoerd!"
 	),
-    
+
 	"find-in-files" =>
 	array(
 		"Enter path to search in" => "Voer het door te zoeken pad in",

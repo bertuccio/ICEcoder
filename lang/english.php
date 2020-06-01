@@ -20,13 +20,9 @@ $text = array(
 		"your device"			=> "your device",
 		"Browser"			=> "Browser:",
 		"Your IP"			=> "Your IP:",
-		"trial remaining"		=> "trial remaining",
-		"days left"			=> "days left",
 		"files"				=> "files",
 		"Last 10 files..."		=> "Last 10 files opened:",
 		"none"				=> "[none]",
-		"test suite"			=> "test suite",
-		"Run unit tests"		=> "Run unit tests",
 		"dev mode"			=> "dev mode",
 		"Status"			=> "Status",
 		"Using"				=> "Using",
@@ -295,7 +291,10 @@ $text = array(
 		"Contract expand file..."	=> "Contract / expand file manager",
 		"Fold unfold current..."	=> "Fold / unfold current line",
 		"Refocus on document"		=> "Refocus on document",
-		"Cancel tasks"			=> "Cancel tasks"
+		"Cancel tasks"			=> "Cancel tasks",
+		"Zoom out"			=> "Zoom out all non-function/class declarations",
+		"Jump to"			=> "Jump to declaration of class/function",
+		"Jump to previous tab"		=> "Jump to previous tab"
 	),
 
 	"ice-coder" =>
@@ -507,7 +506,7 @@ $text = array(
 	array(
 		"Update appears to..."		=> "Update appears to be successful"
 	),
-    
+
 	"find-in-files" =>
 	array(
 		"Enter path to search in" => "Enter path to search in",
